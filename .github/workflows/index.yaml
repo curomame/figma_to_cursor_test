@@ -43,7 +43,7 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.FIGMA_TOKEN }}
 
       - name: Run transform script
-        run: node ./token/token_tf.js
+        run: node ./token/token_tf.mjs
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
