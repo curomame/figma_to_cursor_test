@@ -1,0 +1,57 @@
+name: Transform Tokens
+
+on:
+  push:
+    branches:
+      - design  # 또는 실제 사용하는 브랜치 이름
+    paths:
+      - 'token/token.json'  # 경로를 정확하게 지정
+  # 수동 실행을 위한 workflow_dispatch 추가
+  workflow_dispatch:
+
+# 권한 설정 추가
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  transform-tokens:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.FIGMA_TOKEN }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Token Transformer
+        run: |
+            npx token-transformer token/token.json token/token-tf.json global
+            git config --global user.name "curomame"
+            git config --global user.email "curomame@naver.com"
+            git add .
+            git commit -m 'Figma updated styles'
+            git push
+        env:
+            GITHUB_TOKEN: ${{ secrets.FIGMA_TOKEN }}
+
+      - name: Run transform script
+        run: node ./token/token_tf.js
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          token: ${{ secrets.FIGMA_TOKEN }}
+          commit-message: Transform tokens and update styles
+          branch: transform-tokens-branch
+          title: "Transform tokens and update styles"
+          body: "This PR transforms tokens and updates styles automatically."
+          base: main
