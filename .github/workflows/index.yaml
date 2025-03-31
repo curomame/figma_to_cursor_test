@@ -53,6 +53,14 @@ jobs:
       - name: Run transform script
         run: node ./token/token_tf.mjs
 
+      - name: Check for existing branch
+        run: |
+          if git ls-remote --heads origin transform-tokens-branch | grep transform-tokens-branch; then
+            git push origin --delete transform-tokens-branch
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.FIGMA_TOKEN }}
+
       - name: Create Pull Request
         id: create-pr
         uses: peter-evans/create-pull-request@v4

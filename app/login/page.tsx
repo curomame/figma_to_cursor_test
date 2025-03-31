@@ -1,36 +1,62 @@
 "use client";
 
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage
+} from "@/components/ui/form";
+import { 
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle
+} from "@/components/ui/card";
+
+// Define form schema using zod
+const formSchema = z.object({
+  account: z.string().min(1, {
+    message: "계정을 입력해주세요.",
+  }),
+  password: z.string().min(1, {
+    message: "비밀번호를 입력해주세요.",
+  }),
+});
+
+// Define form values type
+type FormValues = z.infer<typeof formSchema>;
 
 export default function LoginPage() {
-  const [account, setAccount] = useState("");
-  const [password, setPassword] = useState("");
   const router = useRouter();
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Simple validation for demonstration purposes
-    if (!account || !password) {
-      toast({
-        description: "계정 정보를 확인해주세요.",
-      });
-      return;
+  
+  // Initialize form with react-hook-form and zod resolver
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      account: "",
+      password: ""
     }
+  });
 
+  const onSubmit = (data: FormValues) => {
     // In a real app, you would authenticate with a backend here
     router.push("/kanban");
   };
 
   return (
     <div className="flex h-screen w-full">
-      {/* Left side with dark background */}
-      <div className="hidden md:flex md:w-[40%] bg-[#595959] flex-col justify-center items-center">
+      {/* Left side with blue background */}
+      <div className="hidden md:flex md:w-[40%] bg-[#668DFF] flex-col justify-center items-center">
         <div className="flex items-center">
           <div className="rounded-md bg-transparent mr-2">
             <svg 
@@ -52,38 +78,64 @@ export default function LoginPage() {
 
       {/* Right side with login form */}
       <div className="w-full md:w-[60%] flex justify-center items-center">
-        <div className="w-full max-w-[460px] px-6">
-          <div className="flex flex-col items-center gap-12">
-            <h1 className="text-2xl font-bold text-[#333333]">로그인</h1>
-            
-            <form onSubmit={handleLogin} className="w-full space-y-12">
-              <div className="space-y-1">
-                <Input
-                  type="text"
-                  placeholder="계정"
-                  className="h-12 border-[#EAEAEA] text-[#888888]"
-                  value={account}
-                  onChange={(e) => setAccount(e.target.value)}
-                />
-                <Input
-                  type="password"
-                  placeholder="비밀번호"
-                  className="h-12 border-[#EAEAEA] text-[#888888]"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-              
-              <Button 
-                type="submit" 
-                className="w-full h-12 bg-[#595959] hover:bg-[#444444] text-white disabled:bg-[#EAEAEA] disabled:text-[#888888]"
-                disabled={!account || !password}
-              >
-                로그인
-              </Button>
-            </form>
-          </div>
-        </div>
+        <Card className="w-full max-w-[460px] mx-6 border-none shadow-none">
+          <CardHeader className="items-center pb-0">
+            <CardTitle className="text-2xl font-bold text-[#333333]">로그인</CardTitle>
+          </CardHeader>
+          
+          <CardContent className="pt-12">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-12">
+                <div className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="account"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            placeholder="계정"
+                            className="h-12 border-[#EAEAEA] text-[#888888]"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            type="password"
+                            placeholder="비밀번호"
+                            className="h-12 border-[#EAEAEA] text-[#888888]"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                <Button 
+                  type="submit" 
+                  className="w-full h-12"
+                  style={{
+                    backgroundColor: "#668DFF",
+                    color: "white"
+                  }}
+                >
+                  로그인
+                </Button>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
       </div>
       <Toaster />
     </div>
