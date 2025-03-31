@@ -54,4 +54,3 @@ jobs:
           title: "Transform tokens and update styles"
           body: "This PR transforms tokens and updates styles automatically."
           base: master
-          auto-merge: true
