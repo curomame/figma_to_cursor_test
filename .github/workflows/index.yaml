@@ -54,3 +54,9 @@ jobs:
           title: "Transform tokens and update styles"
           body: "This PR transforms tokens and updates styles automatically."
           base: master
+          delete-branch: true
+
+      - name: Delete existing branch
+        run: |
+          git push origin --delete transform-tokens-branch || true
+        continue-on-error: true
