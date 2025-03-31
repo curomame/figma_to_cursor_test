@@ -45,7 +45,13 @@ jobs:
       - name: Run transform script
         run: node ./token/token_tf.mjs
 
+      - name: Delete existing branch
+        run: |
+          git push origin --delete transform-tokens-branch || true
+        continue-on-error: true
+
       - name: Create Pull Request
+        id: create-pr
         uses: peter-evans/create-pull-request@v4
         with:
           token: ${{ secrets.FIGMA_TOKEN }}
@@ -56,7 +62,10 @@ jobs:
           base: master
           delete-branch: true
 
-      - name: Delete existing branch
+      - name: Auto-merge Pull Request
+        if: steps.create-pr.outputs.pull-request-number
         run: |
-          git push origin --delete transform-tokens-branch || true
-        continue-on-error: true
+          PR_NUMBER="${{ steps.create-pr.outputs.pull-request-number }}"
+          gh pr merge $PR_NUMBER --auto --merge
+        env:
+          GITHUB_TOKEN: ${{ secrets.FIGMA_TOKEN }}
